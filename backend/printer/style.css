@@ -1,0 +1,25 @@
+@page {
+    width: 62mm;
+    height: 20mm;
+    padding: 4mm;
+}
+
+img {
+    height: 12mm;
+    display: inline-block;
+    vertical-align: middle;
+    image-rendering: pixelated;
+    position: absolute;
+    bottom: 0px; right: 0px;
+}
+.label {
+    font-family: 'Courier New', Courier, monospace;
+    vertical-align: middle;
+    display: inline-block;
+    font-size: 8px;
+}
+
+.extra_info {
+    font-size: 8px;
+    max-width: 38mm;
+}
