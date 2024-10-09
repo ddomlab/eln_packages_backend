@@ -1,6 +1,6 @@
 import pubchempy as pcp
 import backend.image_generator as ig
-from common.resourcemanage import Resource_Manager
+from resourcemanage import Resource_Manager
 import backend.printer.generate_label as labelgen
 import json
 

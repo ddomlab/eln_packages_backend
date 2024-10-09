@@ -1,14 +1,17 @@
 from blabel import LabelWriter
-from common.resourcemanage import Resource_Manager
+from resourcemanage import Resource_Manager
 import json
+from pathlib import Path
+
+current_dir = Path(__file__).parent
 
 
 class LabelGenerator:
     def __init__(self):
         self.label_writer = LabelWriter(
-            "backend/printer/label.html",
-            default_stylesheets=("backend/printer/style.css",),
-        )  # TODO: platform agnostic paths
+            str(current_dir / "label.html"),
+            default_stylesheets=(str(current_dir / "style.css")),
+        )
         self.records = []
         self.rm = Resource_Manager()
         self.path = self.rm.printer_path
