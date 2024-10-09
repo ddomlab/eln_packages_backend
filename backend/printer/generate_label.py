@@ -23,7 +23,7 @@ class LabelGenerator:
             dict(
                 id_num=id,
                 name=item["title"],
-                received_date = json.loads(item["metadata"]["extra_fields"]).to_dict()["Received Date"]["value"]
+                received_date = json.loads(item["metadata"]["extra_fields"]).to_dict()["Received Date"]["value"],
                 qr_json=json.dumps({"id": id}),
             )
         )
