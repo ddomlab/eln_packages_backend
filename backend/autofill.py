@@ -1,6 +1,7 @@
 import pubchempy as pcp
 import backend.image_generator as ig
-from backend.resourcemanage import Resource_Manager
+from common.resourcemanage import Resource_Manager
+import backend.printer.generate_label as labelgen
 import json
 
 rm = Resource_Manager()
@@ -22,26 +23,82 @@ def get_compound(CAS):
     return compound
 
 
-def fill_in(id):
+def check_if_cas(input: str) -> bool:
+    for char in input:
+        if not char.isdigit() and char != "-":
+            return False
+    return True
+
+
+def fill_in(id: int):
     body: dict = rm.get_item(id)
     compound = get_compound(body["title"])
-    CAS = body["title"]
+    if check_if_cas(body["title"]):
+        CAS = body["title"]
+        body["title"] = compound.synonyms[0]
+    elif "CAS" in json.loads(body["metadata"])["extra_fields"]:
+        CAS = json.loads(body["metadata"])["extra_fields"]["CAS"]["value"]
     metadata = json.loads(body["metadata"])
-    metadata["extra_fields"]["SMILES"]["value"] = compound.isomeric_smiles
     metadata["extra_fields"]["Full name"]["value"] = compound.iupac_name
+
+    if "SMILES" not in metadata["extra_fields"]:
+        metadata["extra_fields"]["SMILES"] = {
+            "type": "text",
+            "value": "",
+            "description": "From PubChem",
+        }
+    metadata["extra_fields"]["SMILES"]["value"] = compound.isomeric_smiles
+    if "CAS" not in metadata["extra_fields"]:
+        metadata["extra_fields"]["CAS"] = {
+            "type": "text",
+            "value": "",
+            "description": "",
+        }
     metadata["extra_fields"]["CAS"]["value"] = CAS
-    # metadata["extra_fields"]["Molecular Weight"]["value"] = compound.molecular_weight
+    if "Molecular Weight" not in metadata["extra_fields"]:
+        metadata["extra_fields"]["Molecular Weight"] = {
+            "type": "text",
+            "value": "",
+            "description": "From PubChem (g/mol)",
+        }
+    metadata["extra_fields"]["Molecular Weight"]["value"] = compound.molecular_weight
+    if "Pubchem Link" not in metadata["extra_fields"]:
+        metadata["extra_fields"]["Pubchem Link"] = {
+            "type": "url",
+            "value": "",
+            "description": "Link to PubChem page",
+        }
+    metadata["extra_fields"]["Pubchem Link"]["value"] = (
+        f"https://pubchem.ncbi.nlm.nih.gov/compound/{compound.cid}"
+    )
+    if "Hazards Link" not in metadata["extra_fields"]:
+        metadata["extra_fields"]["Hazards Link"] = {
+            "type": "url",
+            "value": "",
+            "description": "Link to Hazards section of PubChem",
+        }
+    metadata["extra_fields"]["Hazards Link"]["value"] = (
+        f"https://pubchem.ncbi.nlm.nih.gov/compound/{compound.cid}#section=Hazards-Identification"
+    )
 
     # TODO add hazards : this is proving to be more difficult than expected, i'll deal with this later
     # hazards are not readily accessible through pubchempy api, so i'll have to find another way to get them
 
     body = {
-        "title": compound.synonyms[0],
         "rating": 5,
         "metadata": json.dumps(metadata),
     }
-    check_and_fill_image(compound.isomeric_smiles, id)
     rm.change_item(id, body)
+
+
+def create_and_upload_labels(id: int):
+    filenames: list[str] = []
+    for file in rm.get_uploaded_files(id):
+        filenames.append(file.to_dict()["real_name"])
+    if "label.pdf" not in filenames:
+        labelgen.add_item(id)
+        labelgen.write_labels()
+        rm.upload_file(id, labelgen.path)
 
 
 def check_and_fill_image(smiles, id):
@@ -58,61 +115,32 @@ def check_and_fill_image(smiles, id):
         rm.upload_file(id, imagepath)
 
 
-def autofill_chemical(start, end=None, force=False):  # autofills compounds and polymers
-    items = rm.get_items(
-        size=100
-    )  # get the most recent 100 items. ADJUST THIS IF THERE ARE MORE THAN 100 ITEMS AND YOU NEED TO FILL IN MORE (i set this to be reasonably low so if this does cause an error one day, i will be there to see it. hopefully  we shouldn't need to do operations on every chemical very often at all though)
+def autofill(
+    start=300, end=None, force=False, info=True, label=False, image=False, max=15
+):  # autofills compounds and polymers, force fills in items even if they've already been filled, the other parameters decide what information to fill
+    # ADJUST max AS NEEDED. set to a small number to limit the scope of damage if something goes wrong, but for huge batch operations, set to a larger number
+    items = rm.get_items(size=max)
     if end is None:
-        end = len(items)
+        end = start + max
     for item in items:
-        type = item.to_dict()["category"]
+        type: int = item.to_dict()["category"]
+        smiles: str = json.loads(item.to_dict()["metadata"])["extra_fields"]["SMILES"][
+            "value"
+        ]
+
         if type == 2 or type == 3:  # limits to only polymers and compounds
             print("Filling in item", item.to_dict()["id"])
             metadata = json.loads(item.to_dict()["metadata"])
             CAS = metadata["extra_fields"]["CAS"]["value"]
             id = item.to_dict()["id"]
             # check if CAS is there. also a safety to prevent it going and messing up old resources, unless force is set to true
-            if (
-                (
-                    CAS == "" or force
-                )  # check if the compound has already been "filled in"
-                and id in range(start, end)  # so it doesn't operate outside of range
-            ):
-                fill_in(id)
-            else:
-                print(
-                    f"Item {id} is not a compound or polymer, or has already been filled in"
-                )
-
-
-def autofill_image_only(
-    start, end=None, force=False
-):  # autofills images for compounds and polymers
-    items = rm.get_items(
-        size=100
-    )  # get the most recent 100 items. ADJUST THIS IF THERE ARE MORE THAN 100 ITEMS AND YOU NEED TO FILL IN MORE (i set this to be reasonably low so if this does cause an error one day, i will be there to see it. hopefully  we shouldn't need to do operations on every chemical very often at all though)
-    if end is None:
-        end = len(items)
-    for item in items:
-        type = item.to_dict()["category"]
-        if type == 2 or type == 3:  # limits to only polymers and compounds
-            print("Filling in item", item.to_dict()["id"])
-            metadata = json.loads(item.to_dict()["metadata"])
-            CAS = metadata["extra_fields"]["CAS"]["value"]
-            id = item.to_dict()["id"]
-            # check if CAS is there. also a safety to prevent it going and messing up old resources, unless force is set to true
-            if (
-                (
-                    CAS == "" or force
-                )  # check if the compound has already been "filled in"
-                and id in range(start, end)  # so it doesn't operate outside of range
-            ):
-                check_and_fill_image(
-                    json.loads(item.to_dict()["metadata"])["extra_fields"]["SMILES"][
-                        "value"
-                    ],
-                    id,
-                )
+            if (CAS == "" or force) and id in range(start, end):
+                if info:
+                    fill_in(id)
+                if label:
+                    create_and_upload_labels(id)
+                if image:
+                    check_and_fill_image(smiles, id)
             else:
                 print(
                     f"Item {id} is not a compound or polymer, or has already been filled in"

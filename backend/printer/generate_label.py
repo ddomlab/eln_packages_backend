@@ -1,12 +1,13 @@
 from blabel import LabelWriter
-from backend.resourcemanage import Resource_Manager
+from common.resourcemanage import Resource_Manager
 import json
 
 
 class LabelGenerator:
     def __init__(self):
         self.label_writer = LabelWriter(
-            "printer/label.html", default_stylesheets=("printer/style.css",)
+            "backend/printer/label.html",
+            default_stylesheets=("backend/printer/style.css",),
         )  # TODO: platform agnostic paths
         self.records = []
         self.rm = Resource_Manager()
