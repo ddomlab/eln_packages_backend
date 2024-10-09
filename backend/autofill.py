@@ -81,9 +81,6 @@ def fill_in(id: int):
         f"https://pubchem.ncbi.nlm.nih.gov/compound/{compound.cid}#section=Hazards-Identification"
     )
 
-    # TODO add hazards : this is proving to be more difficult than expected, i'll deal with this later
-    # hazards are not readily accessible through pubchempy api, so i'll have to find another way to get them
-
     body = {
         "rating": 5,
         "metadata": json.dumps(metadata),
