@@ -1,10 +1,10 @@
-<div>
-    <span class='label'>
-        {{ name }}<br/>
-        id: {{ id_num }} <br/>
-        <div class="extra_info">
-        Received Date: {{ received_date }}<br/><br/>
-        </div>
-    </span>
-    <img src="{{ label_tools.qr_code(qr_json) }}"/>
-</div>
+<img src="{{ label_tools.qr_code(qr_text) }}"/>
+<span class='label'>
+    {{ name }}<br/>
+    id: {{ id_num }} <br/>
+    <div class="extra_info">
+    Received Date: {{ received_date }}<br/><br/>
+    </div>
+</span>
+
+

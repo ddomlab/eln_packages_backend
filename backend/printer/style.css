@@ -1,19 +1,14 @@
 @page {
     width: 62mm;
-    height: 22mm;
+    height: 18mm;
     padding: 4mm;
 }
 
 img {
-    width: 12mm;
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: fill;
+    height: 18mm;
     display: inline-block;
     vertical-align: middle;
     image-rendering: pixelated;
-    position: absolute;
-    bottom: 0px; right: 0px;
 }
 .label {
     font-family: 'Courier New', Courier, monospace;

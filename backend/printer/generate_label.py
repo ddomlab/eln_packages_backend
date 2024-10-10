@@ -29,7 +29,8 @@ class LabelGenerator:
                 id_num=id,
                 name=item["title"],
                 received_date=date,
-                qr_json=json.dumps({"id": id}),
+                qr_text=f"https://eln.ddomlab.org/database.php?mode=view&id={id}",
+                # qr_text=json.dumps({"action" : "action_name"})
             )
         )
 
