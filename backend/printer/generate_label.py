@@ -21,7 +21,7 @@ class LabelGenerator:
         date = ""
         if item["category"] == 1:
             date = "N/A"
-        elif item["category"] == 2 or item["category"] == 3:
+        elif item["category"] in range(2, 5):
             date = json.loads(item["metadata"])["extra_fields"]["Received"]["value"]
         ## adds records to list to be printed
         self.records.append(
