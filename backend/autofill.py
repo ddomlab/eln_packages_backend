@@ -1,10 +1,11 @@
 import pubchempy as pcp
-import backend.image_generator as ig
+import image_generator as ig
 from resourcemanage import Resource_Manager
-import backend.printer.generate_label as labelgen
+import printer.generate_label
 import json
 
 rm = Resource_Manager()
+labelgen = printer.generate_label.LabelGenerator()
 
 
 # CAS numbers fall in the 'name' category on pubchem, so they are searched as names
@@ -31,12 +32,15 @@ def check_if_cas(input: str) -> bool:
 
 def fill_in(id: int):
     body: dict = rm.get_item(id)
-    compound = get_compound(body["title"])
     if check_if_cas(body["title"]):
         CAS = body["title"]
+        compound = get_compound(body["title"])
         body["title"] = compound.synonyms[0]
     elif "CAS" in json.loads(body["metadata"])["extra_fields"]:
         CAS = json.loads(body["metadata"])["extra_fields"]["CAS"]["value"]
+        compound = get_compound(CAS)
+    else:
+        compound = get_compound(body["title"])
     metadata = json.loads(body["metadata"])
     metadata["extra_fields"]["Full name"]["value"] = compound.iupac_name
 
@@ -88,24 +92,27 @@ def fill_in(id: int):
 
 
 def create_and_upload_labels(id: int):
-    filenames: list[str] = []
     for file in rm.get_uploaded_files(id):
-        filenames.append(file.to_dict()["real_name"])
-    if "label.pdf" not in filenames:
-        labelgen.add_item(id)
-        labelgen.write_labels()
-        rm.upload_file(id, labelgen.path)
+        if file.to_dict()["real_name"] == "label.pdf":
+            print(f"Label already exists for {id}")
+            # return
+            rm.delete_upload(id, file.to_dict()["id"])
+    labelgen.add_item(id)
+    labelgen.write_labels()
+    rm.upload_file(id, labelgen.path)
 
 
 def check_and_fill_image(smiles, id):
     ## upload RDKit image if it isn't there
-    has_image = False
     files = rm.get_uploaded_files(id)
     for file in files:
         if file.to_dict()["real_name"] == "RDKitImage.png":
             print("Image already exists")
-            has_image = True
-    if not has_image:
+            rm.delete_upload(
+                id, file.to_dict()["id"]
+            )  # delete the old image, turn off usually
+            # return # if the image already exists, don't upload it again
+    if smiles != "":
         imagepath = ig.generate_image(smiles)
         print(imagepath)
         rm.upload_file(id, imagepath)
@@ -119,25 +126,29 @@ def autofill(
     if end is None:
         end = start + max
     for item in items:
-        type: int = item.to_dict()["category"]
-        smiles: str = json.loads(item.to_dict()["metadata"])["extra_fields"]["SMILES"][
-            "value"
-        ]
-
-        if type == 2 or type == 3:  # limits to only polymers and compounds
-            print("Filling in item", item.to_dict()["id"])
-            metadata = json.loads(item.to_dict()["metadata"])
-            CAS = metadata["extra_fields"]["CAS"]["value"]
-            id = item.to_dict()["id"]
-            # check if CAS is there. also a safety to prevent it going and messing up old resources, unless force is set to true
-            if (CAS == "" or force) and id in range(start, end):
-                if info:
-                    fill_in(id)
-                if label:
-                    create_and_upload_labels(id)
-                if image:
-                    check_and_fill_image(smiles, id)
-            else:
-                print(
-                    f"Item {id} is not a compound or polymer, or has already been filled in"
-                )
+        type: int = int(item.to_dict()["category"])
+        id = item.to_dict()["id"]
+        if id in range(start, end):
+            if label:
+                create_and_upload_labels(id)
+            if type == 2 or type == 3:  # limits to only polymers and compounds
+                metadata = json.loads(item.to_dict()["metadata"])
+                CAS = metadata["extra_fields"]["CAS"]["value"]
+                # check if CAS is there. this also indicates whether the item has been filled in already # TODO: see if tags work better here
+                if CAS == "" or force:
+                    if info:
+                        try:
+                            fill_in(id)
+                        except ValueError:
+                            print(f"No compound found for item {id}")
+                    if image:
+                        try:
+                            smiles: str = json.loads(item.to_dict()["metadata"])[
+                                "extra_fields"
+                            ]["SMILES"]["value"]
+                        except KeyError:
+                            print(f"No SMILES found for item {id}")
+                            continue
+                        check_and_fill_image(smiles, id)
+                else:
+                    print(f"Item {id} has already been filled in")

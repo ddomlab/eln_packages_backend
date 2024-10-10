@@ -1,11 +1,14 @@
 @page {
     width: 62mm;
-    height: 20mm;
+    height: 22mm;
     padding: 4mm;
 }
 
 img {
-    height: 12mm;
+    width: 12mm;
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: fill;
     display: inline-block;
     vertical-align: middle;
     image-rendering: pixelated;

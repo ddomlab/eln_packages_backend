@@ -10,7 +10,7 @@ class LabelGenerator:
     def __init__(self):
         self.label_writer = LabelWriter(
             str(current_dir / "label.html"),
-            default_stylesheets=(str(current_dir / "style.css")),
+            default_stylesheets=(str(current_dir / "style.css"),),
         )
         self.records = []
         self.rm = Resource_Manager()
@@ -18,12 +18,17 @@ class LabelGenerator:
 
     def add_item(self, id: int):
         item: dict = self.rm.get_item(id)
+        date = ""
+        if item["category"] == 1:
+            date = "N/A"
+        elif item["category"] == 2 or item["category"] == 3:
+            date = json.loads(item["metadata"])["extra_fields"]["Received"]["value"]
         ## adds records to list to be printed
         self.records.append(
             dict(
                 id_num=id,
                 name=item["title"],
-                received_date = json.loads(item["metadata"]["extra_fields"]).to_dict()["Received Date"]["value"],
+                received_date=date,
                 qr_json=json.dumps({"id": id}),
             )
         )
