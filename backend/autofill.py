@@ -32,16 +32,16 @@ def check_if_cas(input: str) -> bool:
 
 def fill_in(id: int):
     body: dict = rm.get_item(id)
+    metadata = json.loads(body["metadata"])
     if check_if_cas(body["title"]):
         CAS = body["title"]
         compound = get_compound(body["title"])
         body["title"] = compound.synonyms[0]
-    elif "CAS" in json.loads(body["metadata"])["extra_fields"]:
-        CAS = json.loads(body["metadata"])["extra_fields"]["CAS"]["value"]
+    elif "CAS" in metadata["extra_fields"]:
+        CAS = metadata["extra_fields"]["CAS"]["value"]
         compound = get_compound(CAS)
     else:
         compound = get_compound(body["title"])
-    metadata = json.loads(body["metadata"])
     metadata["extra_fields"]["Full name"]["value"] = compound.iupac_name
 
     if "SMILES" not in metadata["extra_fields"]:
@@ -133,19 +133,18 @@ def autofill(
                 create_and_upload_labels(id)
             if type == 2 or type == 3:  # limits to only polymers and compounds
                 metadata = json.loads(item.to_dict()["metadata"])
-                CAS = metadata["extra_fields"]["CAS"]["value"]
                 # check if CAS is there. this also indicates whether the item has been filled in already # TODO: see if tags work better here
-                if CAS == "" or force:
+                if "Autofilled" in item["tags"] or force:
                     if info:
                         try:
                             fill_in(id)
+                            rm.add_tag(id, "Autofilled")
                         except ValueError:
+                            rm.add_tag(id, "Not In PubChem")
                             print(f"No compound found for item {id}")
                     if image:
                         try:
-                            smiles: str = json.loads(item.to_dict()["metadata"])[
-                                "extra_fields"
-                            ]["SMILES"]["value"]
+                            smiles: str = metadata["extra_fields"]["SMILES"]["value"]
                         except KeyError:
                             print(f"No SMILES found for item {id}")
                             continue
