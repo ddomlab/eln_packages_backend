@@ -2,10 +2,12 @@
 <span class='label'>
     {{ name }}<br/>
     id: {{ id_num }} <br/>
+    {% if received_date %}
     <div class="extra_info">
     Received Date: {{ received_date }}<br/><br/>
     Open Date:
     </div>
+    {% endif %}
 </span>
 
 

@@ -20,7 +20,7 @@ class LabelGenerator:
         item: dict = self.rm.get_item(id)
         date = ""
         if item["category"] == 1:
-            date = "N/A"
+            date = None  # making date = None trips the if statement in the label.html file. this is because jinja can check if a variable exists or not
         elif item["category"] in range(2, 5):
             date = json.loads(item["metadata"])["extra_fields"]["Received"]["value"]
         ## adds records to list to be printed
