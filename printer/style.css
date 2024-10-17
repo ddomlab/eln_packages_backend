@@ -14,10 +14,10 @@ img {
     font-family: 'Courier New', Courier, monospace;
     vertical-align: middle;
     display: inline-block;
-    font-size: 8px;
+    font-size: 10px;
 }
 
 .extra_info {
-    font-size: 8px;
+    font-size: 10px;
     max-width: 38mm;
 }

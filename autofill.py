@@ -1,11 +1,12 @@
 import pubchempy as pcp
 import image_generator as ig
-from resourcemanage import Resource_Manager
+from eln_packages_common.resourcemanage import Resource_Manager
 import printer.generate_label
 import json
 
 rm = Resource_Manager()
 labelgen = printer.generate_label.LabelGenerator()
+
 
 
 # CAS numbers fall in the 'name' category on pubchem, so they are searched as names
@@ -122,7 +123,8 @@ def autofill(
     start=300, end=None, force=False, info=True, label=False, image=False, max=15
 ):  # autofills compounds and polymers, force fills in items even if they've already been filled, the other parameters decide what information to fill
     # ADJUST max AS NEEDED. set to a small number to limit the scope of damage if something goes wrong, but for huge batch operations, set to a larger number
-    items = rm.get_items(size=max)
+    items: list[Item] = rm.get_items(size=max)
+    # the type Item is not subscriptable, but has a to_dict() method that makes it a dictionary.
     if end is None:
         end = start + max
     for item in items:
@@ -134,7 +136,7 @@ def autofill(
             if type == 2 or type == 3:  # limits to only polymers and compounds
                 metadata = json.loads(item.to_dict()["metadata"])
                 # check if CAS is there. this also indicates whether the item has been filled in already # TODO: see if tags work better here
-                if "Autofilled" in item["tags"] or force:
+                if "Autofilled" in item.to_dict()["tags"] or force:
                     if info:
                         try:
                             fill_in(id)

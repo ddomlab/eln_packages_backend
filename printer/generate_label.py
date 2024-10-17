@@ -1,5 +1,5 @@
 from blabel import LabelWriter
-from resourcemanage import Resource_Manager
+from eln_packages_common.resourcemanage import Resource_Manager
 import json
 from pathlib import Path
 

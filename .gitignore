@@ -1,6 +1,9 @@
 # Mac
 .DS_Store
-
+# api key
+api_key
+# temporary files
+tmp/*
 # IDEs
 .idea
 .vscode
