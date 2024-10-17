@@ -1,0 +1,3 @@
+[submodule "eln_packages_common"]
+	path = eln_packages_common
+	url = git@github.com:ddomlab/eln_packages_common.git
