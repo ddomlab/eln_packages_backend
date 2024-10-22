@@ -2,8 +2,10 @@
 .DS_Store
 # api key
 api_key
+
 # slack api key stuff
 slack/slack_info.json
+
 # temporary files
 tmp/*
 # IDEs
