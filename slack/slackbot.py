@@ -2,14 +2,18 @@ import requests
 import json
 # channel ID of the eln_bot channel, can be found by clicking "view channel details"
 DEFAULT_CHANNEL: str = 'C0784B6DH45'
+BOT_TOKEN: str = ""
+with open('slack/slack_info.json') as file:
+    BOT_TOKEN = file.read()
+
 # headers and authentication token
 headers: dict = {
-    'Authorization' : 'Bearer ' + json.loads(open('slack/slack_info.json').read())['slack_bot_token'],
+    'Authorization' : 'Bearer ' + BOT_TOKEN,
     'Content-Type': 'application/json'
 }
 
-json_data: dict = {
-    'channel' : "",
+json_data: dict = { #initialize the json data
+    'channel' : '',
     'text' : ''
 }
 # Very simple bot. Sends a message in its designated channel when called. 
