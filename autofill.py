@@ -13,15 +13,15 @@ labelgen = printer.generate_label.LabelGenerator()
 # CAS numbers fall in the 'name' category on pubchem, so they are searched as names
 # you could also search by the common name or any other synonym, however CAS numbers
 # should return more consistent results
-def get_compound(CAS):
-    compound_list = pcp.get_compounds(CAS, "name")
+def get_compound(CAS) -> pcp.Compound:
+    compound_list: list[pcp.Compound] = pcp.get_compounds(CAS, "name")
     if len(compound_list) > 1:
         raise ValueError(
             "Multiple compounds with this name have been found, please input a more specific name or CAS number"
         )
     elif len(compound_list) == 0:
         raise ValueError("No compound with this name has been found")
-    compound = compound_list[0]
+    compound: pcp.Compound = compound_list[0]
     return compound
 
 
@@ -34,19 +34,23 @@ def check_if_cas(input: str) -> bool:
 
 def fill_in(id: int):
     body: dict = rm.get_item(id)
-    metadata = json.loads(body["metadata"])
-    if check_if_cas(body["title"]):
-        CAS = body["title"]
-        compound = get_compound(body["title"])
+    metadata: dict = json.loads(body["metadata"])
+    if check_if_cas(body["title"]): 
+        # if the title is a CAS number, search by CAS number, and replace the title with the first synonym on PubChem
+        CAS: str = body["title"]
+        compound: pcp.Compound = get_compound(body["title"])
         body["title"] = compound.synonyms[0]
     elif "CAS" in metadata["extra_fields"]:
+        # if the title is not a CAS but there is a CAS in the metadata, search by that CAS
         CAS = metadata["extra_fields"]["CAS"]["value"]
-        compound = get_compound(CAS)
+        compound: pcp.Compound = get_compound(CAS)
     else:
-        compound = get_compound(body["title"])
+        # otherwise try to search by the non-CAS title
+        compound: pcp.Compound = get_compound(body["title"])
     metadata["extra_fields"]["Full name"]["value"] = compound.iupac_name
 
     if "SMILES" not in metadata["extra_fields"]:
+        # if there isn't a SMILES field, create one
         metadata["extra_fields"]["SMILES"] = {
             "type": "text",
             "value": "",
@@ -54,6 +58,7 @@ def fill_in(id: int):
         }
     metadata["extra_fields"]["SMILES"]["value"] = compound.isomeric_smiles
     if "CAS" not in metadata["extra_fields"]:
+        # if there isn't a CAS field, create one
         metadata["extra_fields"]["CAS"] = {
             "type": "text",
             "value": "",
@@ -61,6 +66,7 @@ def fill_in(id: int):
         }
     metadata["extra_fields"]["CAS"]["value"] = CAS
     if "Molecular Weight" not in metadata["extra_fields"]:
+        # if there isn't a molecular weight field, create one #TODO: make this a number
         metadata["extra_fields"]["Molecular Weight"] = {
             "type": "text",
             "value": "",
@@ -68,6 +74,7 @@ def fill_in(id: int):
         }
     metadata["extra_fields"]["Molecular Weight"]["value"] = compound.molecular_weight
     if "Pubchem Link" not in metadata["extra_fields"]:
+        # if there isn't a Pubchem link field, create one
         metadata["extra_fields"]["Pubchem Link"] = {
             "type": "url",
             "value": "",
@@ -77,6 +84,7 @@ def fill_in(id: int):
         f"https://pubchem.ncbi.nlm.nih.gov/compound/{compound.cid}"
     )
     if "Hazards Link" not in metadata["extra_fields"]:
+        # if there isn't a hazards link field, create one
         metadata["extra_fields"]["Hazards Link"] = {
             "type": "url",
             "value": "",
@@ -87,7 +95,7 @@ def fill_in(id: int):
     )
 
     body = {
-        "rating": 5,
+        "rating": 0, # before i figured out tags I used this to mark autofilled items, no longer necessary. this will remove ratings
         "metadata": json.dumps(metadata),
     }
     rm.change_item(id, body)
@@ -121,13 +129,18 @@ def check_and_fill_image(smiles, id):
 
 
 def autofill(
-    start=300, end=None, force=False, info=True, label=False, image=False, max=15
+    start=300, end=float('inf'), force=False, info=True, label=True, image=True, max=5
 ):  # autofills compounds and polymers, force fills in items even if they've already been filled, the other parameters decide what information to fill
-    # ADJUST max AS NEEDED. set to a small number to limit the scope of damage if something goes wrong, but for huge batch operations, set to a larger number
-    items: list[Item] = rm.get_items(size=max)
+    # start: lowest bound of item id to autofill
+    # end: highest bound of item id to autofill, no end by default
+    # force: whether to fill in items that have already been filled in--False by default
+    # info: whether to fill in the information fields--True by default
+    # label: whether to generate a label pdf--True by default
+    # image: whether to generate an RDKit image--True by default
+    # max: number of recent entries to check. Default is 5 to prevent unnecessary traffic. Set to higher to check old entries.
+    ### NOTE: if you set start to a very low number, you will have to set max to a higher number in order to pull enough entires to reach the start number
+    items: list[rm.itemsapi.Item] = rm.get_items(size=max)
     # the type Item is not subscriptable, but has a to_dict() method that makes it a dictionary.
-    if end is None:
-        end = start + max
     for item in items:
         type: int = int(item.to_dict()["category"])
         id = item.to_dict()["id"]
@@ -136,7 +149,7 @@ def autofill(
                 create_and_upload_labels(id)
             if type == 2 or type == 3:  # limits to only polymers and compounds
                 metadata = json.loads(item.to_dict()["metadata"])
-                # check if CAS is there. this also indicates whether the item has been filled in already # TODO: see if tags work better here
+                # check if CAS is there. this also indicates whether the item has been filled in already
                 if "Autofilled" in item.to_dict()["tags"] or force:
                     if info:
                         try:
