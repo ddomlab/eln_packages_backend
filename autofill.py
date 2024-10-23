@@ -129,7 +129,7 @@ def check_and_fill_image(smiles, id):
 
 
 def autofill(
-    start=300, end=float('inf'), force=False, info=True, label=True, image=True, max=5
+    start=300, end=float('inf'), force=False, info=True, label=True, image=True, size=5
 ):  # autofills compounds and polymers, force fills in items even if they've already been filled, the other parameters decide what information to fill
     # start: lowest bound of item id to autofill
     # end: highest bound of item id to autofill, no end by default
@@ -137,9 +137,10 @@ def autofill(
     # info: whether to fill in the information fields--True by default
     # label: whether to generate a label pdf--True by default
     # image: whether to generate an RDKit image--True by default
-    # max: number of recent entries to check. Default is 5 to prevent unnecessary traffic. Set to higher to check old entries.
-    ### NOTE: if you set start to a very low number, you will have to set max to a higher number in order to pull enough entires to reach the start number
-    items: list[rm.itemsapi.Item] = rm.get_items(size=max)
+    # size: number of recent entries to check. Default is 5 to prevent unnecessary traffic. Set to higher to check old entries.
+    ### NOTE: if you set start to a very low number, you will likely have to set size to a higher number in order to pull enough entires to reach the start number
+    ### the most recent 
+    items: list[rm.itemsapi.Item] = rm.get_items(size=size)
     # the type Item is not subscriptable, but has a to_dict() method that makes it a dictionary.
     for item in items:
         type: int = int(item.to_dict()["category"])
