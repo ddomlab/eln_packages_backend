@@ -129,7 +129,7 @@ def check_and_fill_image(smiles, id):
 
 
 def autofill(
-    start=300, end=float('inf'), force=False, info=True, label=True, image=True, size=5
+    start=300, end=None, force=False, info=True, label=True, image=True, size=5
 ):  # autofills compounds and polymers, force fills in items even if they've already been filled, the other parameters decide what information to fill
     # start: lowest bound of item id to autofill
     # end: highest bound of item id to autofill, no end by default
@@ -145,13 +145,13 @@ def autofill(
     for item in items:
         type: int = int(item.to_dict()["category"])
         id = item.to_dict()["id"]
-        if id in range(start, end):
+        if (end is None and id >= start) or (end is not None and id in range(start, end)):
             if label:
                 create_and_upload_labels(id)
             if type == 2 or type == 3:  # limits to only polymers and compounds
                 metadata = json.loads(item.to_dict()["metadata"])
                 # check if CAS is there. this also indicates whether the item has been filled in already
-                if "Autofilled" in item.to_dict()["tags"] or force:
+                if "Autofilled" not in item.to_dict()["tags"] or force:
                     if info:
                         try:
                             fill_in(id)
