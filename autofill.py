@@ -3,6 +3,7 @@ import image_generator as ig
 from eln_packages_common.resourcemanage import Resource_Manager
 import printer.generate_label
 import json
+import slack.slackbot as slackbot
 
 rm = Resource_Manager()
 labelgen = printer.generate_label.LabelGenerator()
@@ -144,6 +145,7 @@ def autofill(
                         except ValueError:
                             rm.add_tag(id, "Not In PubChem")
                             print(f"No compound found for item {id}")
+                            slackbot.send_message(f"No compound found in PubChem for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
                     if image:
                         try:
                             smiles: str = metadata["extra_fields"]["SMILES"]["value"]
