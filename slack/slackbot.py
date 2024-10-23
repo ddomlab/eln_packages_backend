@@ -3,7 +3,7 @@ import json
 # channel ID of the eln_bot channel, can be found by clicking "view channel details"
 DEFAULT_CHANNEL: str = 'C0784B6DH45'
 BOT_TOKEN: str = ""
-with open('slack/slack_info.json') as file:
+with open('slack/slack_bot_token') as file:
     BOT_TOKEN = file.read()
 
 # headers and authentication token
