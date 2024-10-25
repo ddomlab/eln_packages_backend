@@ -94,10 +94,8 @@ def fill_in(id: int):
         f"https://pubchem.ncbi.nlm.nih.gov/compound/{compound.cid}#section=Hazards-Identification"
     )
 
-    body = {
-        "rating": 0, # before i figured out tags I used this to mark autofilled items, no longer necessary. this will remove ratings
-        "metadata": json.dumps(metadata),
-    }
+    body["rating"] = 0 # before i figured out tags I used this to mark autofilled items, no longer necessary. this will remove ratings
+    body["metadata"] = json.dumps(metadata)
     rm.change_item(id, body)
 
 
