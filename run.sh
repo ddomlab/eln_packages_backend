@@ -1,2 +1,2 @@
 #!/bin/bash
-python $(dirname $0)/main.py
+/usr/share/applications/miniconda3/envs/ddomlabbackend/bin/python $(dirname $0)/main.py
