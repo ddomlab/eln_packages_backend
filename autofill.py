@@ -128,9 +128,9 @@ def check_and_fill_image(smiles, id):
         rm.upload_file(id, imagepath)
 
 
-def autofill(
-    start=300, end=None, force=False, info=True, label=True, image=True, size=5
-):  # autofills compounds and polymers, force fills in items even if they've already been filled, the other parameters decide what information to fill
+def autofill(start=300, end=None, force=False, info=True, label=True, image=True, size=5):  
+    # this method controls which functions are called and handles deciding which items to autofill
+    
     # start: lowest bound of item id to autofill
     # end: highest bound of item id to autofill, no end by default
     # force: whether to fill in items that have already been filled in--False by default
@@ -150,7 +150,7 @@ def autofill(
                 create_and_upload_labels(id)
             if type == 2 or type == 3:  # limits to only polymers and compounds
                 metadata = json.loads(item.to_dict()["metadata"])
-                # check if CAS is there. this also indicates whether the item has been filled in already
+                # check if the item has been autofilled already, or if force is true
                 if "Autofilled" not in item.to_dict()["tags"] or force:
                     if info:
                         try:
