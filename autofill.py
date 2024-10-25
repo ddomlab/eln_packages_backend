@@ -105,8 +105,8 @@ def create_and_upload_labels(id: int):
     for file in rm.get_uploaded_files(id):
         if file.to_dict()["real_name"] == "label.pdf":
             print(f"Label already exists for {id}")
-            # return
-            rm.delete_upload(id, file.to_dict()["id"])
+            return
+            # rm.delete_upload(id, file.to_dict()["id"])
     labelgen.add_item(id)
     labelgen.write_labels()
     rm.upload_file(id, labelgen.path)
