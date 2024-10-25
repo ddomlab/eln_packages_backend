@@ -39,7 +39,8 @@ def fill_in(id: int):
         # if the title is a CAS number, search by CAS number, and replace the title with the first synonym on PubChem
         CAS: str = body["title"]
         compound: pcp.Compound = get_compound(body["title"])
-        body["title"] = compound.synonyms[0]
+        body["title"] = compound.synonyms[0]]
+        print(compoun.synonyms[0])
     elif "CAS" in metadata["extra_fields"]:
         # if the title is not a CAS but there is a CAS in the metadata, search by that CAS
         CAS = metadata["extra_fields"]["CAS"]["value"]
