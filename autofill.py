@@ -35,11 +35,12 @@ def check_if_cas(input: str) -> bool:
 def fill_in(id: int):
     body: dict = rm.get_item(id)
     metadata: dict = json.loads(body["metadata"])
+    new_title: str = body["title"]
     if check_if_cas(body["title"]): 
         # if the title is a CAS number, search by CAS number, and replace the title with the first synonym on PubChem
         CAS: str = body["title"]
         compound: pcp.Compound = get_compound(body["title"])
-        body["title"] = compound.synonyms[0]
+        new_title = compound.synonyms[0]
         print(compound.synonyms[0])
     elif "CAS" in metadata["extra_fields"]:
         # if the title is not a CAS but there is a CAS in the metadata, search by that CAS
@@ -94,10 +95,12 @@ def fill_in(id: int):
     metadata["extra_fields"]["Hazards Link"]["value"] = (
         f"https://pubchem.ncbi.nlm.nih.gov/compound/{compound.cid}#section=Hazards-Identification"
     )
-
-    body["rating"] = 0 # before i figured out tags I used this to mark autofilled items, no longer necessary. this will remove ratings
-    body["metadata"] = json.dumps(metadata)
-    rm.change_item(id, body)
+    new_body = {
+        "title": new_title,
+        "metadata": json.dumps(metadata),
+        "rating": 0, # before i figured out tags I used this to mark autofilled items, no longer necessary. this will remove ratings
+    }
+    rm.change_item(id, new_body)
 
 
 def create_and_upload_labels(id: int):
