@@ -21,7 +21,7 @@ def create_and_upload_labels(id: int):
             # rm.delete_upload(id, file.to_dict()["id"])
     labelgen.add_item(id)
     labelgen.write_labels()
-    rm.upload_file(id, labelgen.path)
+    rm.upload_file(id, str(labelgen.path))
 
 
 def check_and_fill_image(smiles, id):
