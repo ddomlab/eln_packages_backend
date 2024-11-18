@@ -63,7 +63,7 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
             if type == 2 or type == 3:  # limits to only polymers and compounds
                 metadata = json.loads(item.to_dict()["metadata"])
                 # check if the item has been autofilled already, or if force is true
-                if "Autofilled" not in item.to_dict()["tags"] or force:
+                if item.to_dict()["tags"] is None or "Autofilled" not in item.to_dict()["tags"] or force:
                     if info:
                         try:
                             eln_packages_common.fill_info.fill_in(id)
