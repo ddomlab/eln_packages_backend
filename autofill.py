@@ -68,10 +68,16 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                         try:
                             eln_packages_common.fill_info.fill_in(id)
                             rm.add_tag(id, "Autofilled")
-                        except ValueError:
-                            rm.add_tag(id, "Not In PubChem")
-                            print(f"No compound found for item {id}")
-                            slackbot.send_message(f"No compound found in PubChem for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
+                        except ValueError as e:
+                            if "Not In PubChem" not in item.to_dict()["tags"]:
+                                rm.add_tag(id, "Not In PubChem")
+                                print(str(e))
+                                if "No compound" in str(e):
+                                    print(f"No compound found for item {id}")
+                                    slackbot.send_message(f"No single compound found in PubChem for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
+                                elif "Multiple compounds" in str(e):
+                                    print(f"Multiple compounds found for item {id}")
+                                    slackbot.send_message(f"Multiple compounds found in PubChem for item {id}. Manual addition of chemical properties required. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
                     if image:
                         try:
                             smiles: str = metadata["extra_fields"]["SMILES"]["value"]
