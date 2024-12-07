@@ -69,7 +69,9 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                             eln_packages_common.fill_info.fill_in(id)
                             rm.add_tag(id, "Autofilled")
                         except ValueError as e:
-                            if "Not In PubChem" not in item.to_dict()["tags"]:
+                            if "Null molecule" in str(e):
+                                slackbot.send_message(f"Invalid SMILES provided in SMILES for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
+                            if item.to_dict()["tags"] is None or "Not In PubChem" not in item.to_dict()["tags"]:
                                 rm.add_tag(id, "Not In PubChem")
                                 print(str(e))
                                 if "No compound" in str(e):
@@ -81,9 +83,10 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                     if image:
                         try:
                             smiles: str = metadata["extra_fields"]["SMILES"]["value"]
+                            check_and_fill_image(smiles, id)
                         except KeyError:
                             print(f"No SMILES found for item {id}")
-                            continue
-                        check_and_fill_image(smiles, id)
+                        except ValueError:
+                            print(f"Invalid SMILES found for item {id}")
                 else:
                     print(f"Item {id} has already been filled in")
