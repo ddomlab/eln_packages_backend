@@ -86,7 +86,11 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                             check_and_fill_image(smiles, id)
                         except KeyError:
                             print(f"No SMILES found for item {id}")
+                            continue
                         except ValueError:
-                            print(f"Invalid SMILES found for item {id}")
+                            if item.to_dict()["tags"] is None or "Invalid SMILES" not in item.to_dict()["tags"]:
+                                rm.add_tag(id, "Invalid SMILES")
+                                slackbot.send_message(f"Invalid SMILES found for item {id}")
+                            continue
                 else:
                     print(f"Item {id} has already been filled in")
