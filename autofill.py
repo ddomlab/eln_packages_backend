@@ -43,6 +43,10 @@ def check_and_fill_image(smiles, id):
 def autofill(start=300, end=None, force=False, info=True, label=True, image=True, size=5):  
     # this method controls which functions are called and handles deciding which items to autofill
     
+    # the start and end parameters can be used to edit a certain range of items. this is not necessary in typical use, when
+    # the method is run automatically on the 5 most recently created items, but the functionality is there if needed--for example:
+    # manually running autofill on a range of items that were created before the autofill was implemented.
+
     # start: lowest bound of item id to autofill
     # end: highest bound of item id to autofill, no end by default
     # force: whether to fill in items that have already been filled in--False by default
