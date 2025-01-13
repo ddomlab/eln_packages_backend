@@ -44,7 +44,7 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
     # this method controls which functions are called and handles deciding which items to autofill
     
     # the start and end parameters can be used to edit a certain range of items. this is not necessary in typical use, when
-    # the method is run automatically on the 5 most recently created items, but the functionality is there if needed--for example:
+    # the method is run automatically on the 5 most recently created items, and only if their ID is greater than 300, but the functionality is there if needed--for example:
     # manually running autofill on a range of items that were created before the autofill was implemented.
 
     # start: lowest bound of item id to autofill
@@ -54,7 +54,8 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
     # label: whether to generate a label pdf--True by default
     # image: whether to generate an RDKit image--True by default
     # size: number of recent entries to check. Default is 5 to prevent unnecessary traffic. Set to higher to check old entries.
-    ### NOTE: if you set start to a very low number, you will likely have to set size to a higher number in order to pull enough entires to reach the start number
+    
+    ### NOTE: if you want to edit a range of old Resources, and you set start to a very low number, you will likely have to set size to a higher number in order to pull enough entires to reach the start number
     ### the most recent 
     items: list = rm.get_items(size=size)
     # the type Item is not subscriptable, but has a to_dict() method that makes it a dictionary.
