@@ -75,13 +75,13 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                             rm.add_tag(id, "Autofilled")
                         except ValueError as e:
                             if "Null molecule" in str(e):
-                                slackbot.send_message(f"Invalid SMILES provided in SMILES for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
+                                slackbot.send_message(f"Invalid SMILES provided in SMILES field for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
                             if item.to_dict()["tags"] is None or "Not In PubChem" not in item.to_dict()["tags"]:
                                 rm.add_tag(id, "Not In PubChem")
                                 print(str(e))
                                 if "No compound" in str(e):
                                     print(f"No compound found for item {id}")
-                                    slackbot.send_message(f"No single compound found in PubChem for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
+                                    slackbot.send_message(f"No compound found in PubChem for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
                                 elif "Multiple compounds" in str(e):
                                     print(f"Multiple compounds found for item {id}")
                                     slackbot.send_message(f"Multiple compounds found in PubChem for item {id}. Manual addition of chemical properties required. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
@@ -95,7 +95,7 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                         except ValueError:
                             if item.to_dict()["tags"] is None or "Invalid SMILES" not in item.to_dict()["tags"]:
                                 rm.add_tag(id, "Invalid SMILES")
-                                slackbot.send_message(f"Invalid SMILES found for item {id}")
+                                slackbot.send_message(f"Invalid SMILES found for item {id}, cannot generate image.")
                             continue
                 else:
                     print(f"Item {id} has already been filled in")
