@@ -8,6 +8,8 @@ dependencies:  # Packages should be installed through conda if possible
   - urllib3
   - requests
   - pypdf
+  - tabulate
+  - pandas
   - pip
   - pip:  # Install additional packages through pip if they're not available in the default conda channel
     - pubchempy
