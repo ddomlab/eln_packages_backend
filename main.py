@@ -9,7 +9,7 @@ except Exception as e:
     slackbot.send_message(f"Error in autofill: {e}", channel="C07SSMMU9E1")
     raise e
 # try:
-#     if today in ["05-05", "11-01"]: # TODO: change back to 01
+#     if today in ["05-01", "11-01"]:
 #         with open("peroxide_formers/last_check", "r") as f:
 #             last_check = f.read()
 #         if last_check != today:
