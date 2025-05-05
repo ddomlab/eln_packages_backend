@@ -1,8 +1,8 @@
-import eln_packages_common.resourcemanage
+import resourcemanage
 import slack.slackbot as slackbot
 import pandas as pd
 from tabulate import tabulate
-rm = eln_packages_common.resourcemanage.Resource_Manager()
+rm = resourcemanage.Resource_Manager()
 
 items = rm.get_items_df(size=1000)
 classes = ['A', 'B', 'C', 'D']
@@ -30,5 +30,6 @@ if __name__ == "__main__":
     try:
         check_all_classes()
     except Exception as e:
+        # catch ALL exceptions and send them to the slack bot channel--generally bad practice but useful here.
         slackbot.send_message(f"Error in check_peroxides: {e}", channel="C07SSMMU9E1")
         raise e
