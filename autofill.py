@@ -7,12 +7,6 @@ import slack.slackbot as slackbot
 
 rm = Resource_Manager()
 labelgen = printer.generate_label.LabelGenerator()
-
-
-
-#get_compound
-#check_if_cas
-#fill_in
 def create_and_upload_labels(id: int):
     for file in rm.get_uploaded_files(id):
         if file.to_dict()["real_name"] == "label.pdf":
