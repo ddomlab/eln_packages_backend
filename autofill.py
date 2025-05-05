@@ -41,24 +41,33 @@ def check_and_fill_image(smiles, id):
 
 
 def autofill(start=300, end=None, force=False, info=True, label=True, image=True, size=5):  
-    # this method controls which functions are called and handles deciding which items to autofill
-    
-    # the start and end parameters can be used to edit a certain range of items. this is not necessary in typical use, when
-    # the method is run automatically on the 5 most recently created items, and only if their ID is greater than 300, but the functionality is there if needed--for example:
-    # manually running autofill on a range of items that were created before the autofill was implemented.
+    """
+    This method controls which functions are called and handles deciding which items to autofill.
+    See: https://ddomlab.slite.com/api/s/057qvutxPk1Tx-/ELN-Backend-Scripts
+    https://raw.githubusercontent.com/ddomlab/eln_packages_backend/ed42074a949a341adab23ae2ca0a90ec573144fc/Screenshot%202025-05-05%20at%2010-56-14%20%F0%9F%94%99%20ELN%20Backend%20Scripts.png    The start and end parameters can be used to edit a certain range of items.
+    This is not necessary in typical use, when the method is run automatically on 
+    the 5 most recently created items, and only if their ID is greater than 300, 
+    but the functionality is there if needed--for example:
+    manually running autofill on a range of items that were created
+    before the autofill was implemented.
 
-    # start: lowest bound of item id to autofill
-    # end: highest bound of item id to autofill, no end by default
-    # force: whether to fill in items that have already been filled in--False by default
-    # info: whether to fill in the information fields--True by default
-    # label: whether to generate a label pdf--True by default
-    # image: whether to generate an RDKit image--True by default
-    # size: number of recent entries to check. Default is 5 to prevent unnecessary traffic. Set to higher to check old entries.
+        :param int start: lowest bound of item id to autofill
+        :param int end: highest bound of item id to autofill, no end by default
+        :param bool force: whether to fill in items that have already been filled in--False by default
+        :param bool info: whether to fill in the information fields--True by default
+        :param bool label: whether to generate a label pdf--True by default
+        :param bool image: whether to generate an RDKit image--True by default
+        :param int size: number of recent entries to check. Default is 5 to prevent unnecessary traffic. Set to higher to check old entries.
     
-    ### NOTE: if you want to edit a range of old Resources, and you set start to a very low number, you will likely have to set size to a higher number in order to pull enough entires to reach the start number
-    ### the most recent 
+    ## NOTE: 
+    if you want to edit a range of old Resources, and you set `start` to a very low number,
+    you will likely have to set `size` to a higher number in order to pull enough entires to reach the start number
+    the most recent 
+    """
     items: list[dict] = rm.get_items(size=size)
     for item in items:
+        if item['category'] is None:  # skip items that don't have a category
+            continue
         type: int = int(item["category"])
         id = item["id"]
         if (end is None and id >= start) or (end is not None and id in range(start, end)):
