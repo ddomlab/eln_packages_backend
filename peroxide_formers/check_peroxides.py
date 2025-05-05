@@ -25,3 +25,10 @@ def check_peroxide_formers(clss: str):
 def check_all_classes():
     for clss in classes:
         check_peroxide_formers(clss)
+
+if __name__ == "__main__":
+    try:
+        check_all_classes()
+    except Exception as e:
+        slackbot.send_message(f"Error in check_peroxides: {e}", channel="C07SSMMU9E1")
+        raise e
