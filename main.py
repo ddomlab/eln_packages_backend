@@ -1,7 +1,7 @@
 import autofill
 import slack.slackbot as slackbot
 from datetime import date
-from check_peroxides import check_all_classes
+from peroxide_formers.check_peroxides import check_all_classes
 
 today = date.today().strftime("%m-%d")
 try:
@@ -11,7 +11,8 @@ except Exception as e:
     slackbot.send_message(f"Error in autofill: {e}", channel="C07SSMMU9E1")
     raise e
 try:
-    if today in ["05-01", "11-01"]:
+    if today in ["05-05", "11-01"]: # TODO: change back to 01
+        #TODO prevent from multiple checks in a day
         check_all_classes()
 except Exception as e:
     slackbot.send_message(f"Error in check_peroxides: {e}", channel="C07SSMMU9E1")

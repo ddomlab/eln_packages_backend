@@ -17,10 +17,10 @@ def send_message(peroxide_class: str, peroxide_list):
 
 def check_peroxide_formers(clss: str):
     assert clss in classes, f"Invalid class {clss}. Valid classes are {classes}"
-    df = pd.read_csv(f"peroxide-formers/Chemical List PEROXIDES{clss}-2025-04-21.csv")
+    df = pd.read_csv(f"peroxide_formers/Chemical List PEROXIDES{clss}-2025-04-21.csv")
     matches[clss] = items[items['CAS'].isin(df['CASRN'])]
     if len(matches[clss]) > 0:
-        send_message(clss, matches[clss][['id', 'title', 'Room', 'Location']].sort_values(by='Room'))
+        send_message(clss, matches[clss][['id', 'title', 'Room', 'Location']].sort_values(by="Location").sort_values(by='Room'))
 
 def check_all_classes():
     for clss in classes:
