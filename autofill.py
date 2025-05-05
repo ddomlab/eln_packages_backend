@@ -57,18 +57,17 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
     
     ### NOTE: if you want to edit a range of old Resources, and you set start to a very low number, you will likely have to set size to a higher number in order to pull enough entires to reach the start number
     ### the most recent 
-    items: list = rm.get_items(size=size)
-    # the type Item is not subscriptable, but has a to_dict() method that makes it a dictionary.
+    items: list[dict] = rm.get_items(size=size)
     for item in items:
-        type: int = int(item.to_dict()["category"])
-        id = item.to_dict()["id"]
+        type: int = int(item["category"])
+        id = item["id"]
         if (end is None and id >= start) or (end is not None and id in range(start, end)):
             if label:
                 create_and_upload_labels(id)
             if type == 2 or type == 3:  # limits to only polymers and compounds
-                metadata = json.loads(item.to_dict()["metadata"])
+                metadata = json.loads(item["metadata"])
                 # check if the item has been autofilled already, or if force is true
-                if item.to_dict()["tags"] is None or "Autofilled" not in item.to_dict()["tags"] or force:
+                if item["tags"] is None or "Autofilled" not in item["tags"] or force:
                     if info:
                         try:
                             eln_packages_common.fill_info.fill_in(id)
@@ -76,7 +75,7 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                         except ValueError as e:
                             if "Null molecule" in str(e):
                                 slackbot.send_message(f"Invalid SMILES provided in SMILES field for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
-                            if item.to_dict()["tags"] is None or "Not In PubChem" not in item.to_dict()["tags"]:
+                            if item["tags"] is None or "Not In PubChem" not in item["tags"]:
                                 rm.add_tag(id, "Not In PubChem")
                                 print(str(e))
                                 if "No compound" in str(e):
@@ -93,7 +92,7 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                             print(f"No SMILES found for item {id}")
                             continue
                         except ValueError:
-                            if item.to_dict()["tags"] is None or "Invalid SMILES" not in item.to_dict()["tags"]:
+                            if item["tags"] is None or "Invalid SMILES" not in item["tags"]:
                                 rm.add_tag(id, "Invalid SMILES")
                                 slackbot.send_message(f"Invalid SMILES found for item {id}, cannot generate image.")
                             continue
