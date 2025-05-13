@@ -7,12 +7,6 @@ import slack.slackbot as slackbot
 
 rm = Resource_Manager()
 labelgen = printer.generate_label.LabelGenerator()
-
-
-
-#get_compound
-#check_if_cas
-#fill_in
 def create_and_upload_labels(id: int):
     for file in rm.get_uploaded_files(id):
         if file.to_dict()["real_name"] == "label.pdf":
@@ -41,34 +35,42 @@ def check_and_fill_image(smiles, id):
 
 
 def autofill(start=300, end=None, force=False, info=True, label=True, image=True, size=5):  
-    # this method controls which functions are called and handles deciding which items to autofill
-    
-    # the start and end parameters can be used to edit a certain range of items. this is not necessary in typical use, when
-    # the method is run automatically on the 5 most recently created items, and only if their ID is greater than 300, but the functionality is there if needed--for example:
-    # manually running autofill on a range of items that were created before the autofill was implemented.
+    """
+    This method controls which functions are called and handles deciding which items to autofill.
+    See: https://ddomlab.slite.com/api/s/057qvutxPk1Tx-/ELN-Backend-Scripts
+    https://raw.githubusercontent.com/ddomlab/eln_packages_backend/ed42074a949a341adab23ae2ca0a90ec573144fc/Screenshot%202025-05-05%20at%2010-56-14%20%F0%9F%94%99%20ELN%20Backend%20Scripts.png    The start and end parameters can be used to edit a certain range of items.
+    This is not necessary in typical use, when the method is run automatically on 
+    the 5 most recently created items, and only if their ID is greater than 300, 
+    but the functionality is there if needed--for example:
+    manually running autofill on a range of items that were created
+    before the autofill was implemented.
 
-    # start: lowest bound of item id to autofill
-    # end: highest bound of item id to autofill, no end by default
-    # force: whether to fill in items that have already been filled in--False by default
-    # info: whether to fill in the information fields--True by default
-    # label: whether to generate a label pdf--True by default
-    # image: whether to generate an RDKit image--True by default
-    # size: number of recent entries to check. Default is 5 to prevent unnecessary traffic. Set to higher to check old entries.
+        :param int start: lowest bound of item id to autofill
+        :param int end: highest bound of item id to autofill, no end by default
+        :param bool force: whether to fill in items that have already been filled in--False by default
+        :param bool info: whether to fill in the information fields--True by default
+        :param bool label: whether to generate a label pdf--True by default
+        :param bool image: whether to generate an RDKit image--True by default
+        :param int size: number of recent entries to check. Default is 5 to prevent unnecessary traffic. Set to higher to check old entries.
     
-    ### NOTE: if you want to edit a range of old Resources, and you set start to a very low number, you will likely have to set size to a higher number in order to pull enough entires to reach the start number
-    ### the most recent 
-    items: list = rm.get_items(size=size)
-    # the type Item is not subscriptable, but has a to_dict() method that makes it a dictionary.
+    ## NOTE: 
+    if you want to edit a range of old Resources, and you set `start` to a very low number,
+    you will likely have to set `size` to a higher number in order to pull enough entires to reach the start number
+    the most recent 
+    """
+    items: list[dict] = rm.get_items(size=size)
     for item in items:
-        type: int = int(item.to_dict()["category"])
-        id = item.to_dict()["id"]
+        if item['category'] is None:  # skip items that don't have a category
+            continue
+        type: int = int(item["category"])
+        id = item["id"]
         if (end is None and id >= start) or (end is not None and id in range(start, end)):
             if label:
                 create_and_upload_labels(id)
             if type == 2 or type == 3:  # limits to only polymers and compounds
-                metadata = json.loads(item.to_dict()["metadata"])
+                metadata = json.loads(item["metadata"])
                 # check if the item has been autofilled already, or if force is true
-                if item.to_dict()["tags"] is None or "Autofilled" not in item.to_dict()["tags"] or force:
+                if item["tags"] is None or "Autofilled" not in item["tags"] or force:
                     if info:
                         try:
                             eln_packages_common.fill_info.fill_in(id)
@@ -76,7 +78,7 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                         except ValueError as e:
                             if "Null molecule" in str(e):
                                 slackbot.send_message(f"Invalid SMILES provided in SMILES field for item {id}. See https://eln.ddomlab.org/database.php?mode=view&id={id}")
-                            if item.to_dict()["tags"] is None or "Not In PubChem" not in item.to_dict()["tags"]:
+                            if item["tags"] is None or "Not In PubChem" not in item["tags"]:
                                 rm.add_tag(id, "Not In PubChem")
                                 print(str(e))
                                 if "No compound" in str(e):
@@ -93,7 +95,7 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                             print(f"No SMILES found for item {id}")
                             continue
                         except ValueError:
-                            if item.to_dict()["tags"] is None or "Invalid SMILES" not in item.to_dict()["tags"]:
+                            if item["tags"] is None or "Invalid SMILES" not in item["tags"]:
                                 rm.add_tag(id, "Invalid SMILES")
                                 slackbot.send_message(f"Invalid SMILES found for item {id}, cannot generate image.")
                             continue
