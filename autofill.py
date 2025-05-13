@@ -1,6 +1,6 @@
 import image_generator as ig
-from eln_packages_common.resourcemanage import Resource_Manager
-import eln_packages_common.fill_info
+from resourcemanage import Resource_Manager
+import fill_info
 import printer.generate_label
 import json
 import slack.slackbot as slackbot
@@ -73,7 +73,7 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
                 if item["tags"] is None or "Autofilled" not in item["tags"] or force:
                     if info:
                         try:
-                            eln_packages_common.fill_info.fill_in(id)
+                            fill_info.fill_in(id)
                             rm.add_tag(id, "Autofilled")
                         except ValueError as e:
                             if "Null molecule" in str(e):
