@@ -1,8 +1,8 @@
-import resourcemanage
+from eln_packages_common.resourcemanage import Resource_Manager
 import slack.slackbot as slackbot
 import pandas as pd
 from tabulate import tabulate
-rm = resourcemanage.Resource_Manager()
+rm = Resource_Manager()
 
 items = rm.get_items_df(size=1000)
 classes = ['A', 'B', 'C', 'D']
