@@ -24,10 +24,12 @@ class LabelGenerator:
         elif item["category"] in range(2, 5):
             date = json.loads(item["metadata"])["extra_fields"]["Received"]["value"]
         ## adds records to list to be printed
+        if len(item["title"]) > 25:
+            item["title"] = item["title"][:22] + '...' 
         self.records.append(
             dict(
                 id_num=id,
-                name=item["title"][:25],
+                name=item["title"],
                 received_date=date,
                 qr_text=f"https://eln.ddomlab.org/database.php?mode=view&id={id}",
                 # qr_text=json.dumps({"action" : "action_name"})
