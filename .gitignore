@@ -1,7 +1,7 @@
 # Mac
 .DS_Store
 # api key
-api_key
+*api_key
 
 # slack bot token for slack api.
 slack/slack_bot_token

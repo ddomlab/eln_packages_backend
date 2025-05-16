@@ -1,5 +1,5 @@
 from blabel import LabelWriter
-from resourcemanage import Resource_Manager
+from eln_packages_common.resourcemanage import Resource_Manager
 import json
 from pathlib import Path
 
@@ -24,6 +24,8 @@ class LabelGenerator:
         elif item["category"] in range(2, 5):
             date = json.loads(item["metadata"])["extra_fields"]["Received"]["value"]
         ## adds records to list to be printed
+        if len(item["title"]) > 25:
+            item["title"] = item["title"][:22] + '...' 
         self.records.append(
             dict(
                 id_num=id,

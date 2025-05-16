@@ -1,6 +1,6 @@
 import image_generator as ig
-from resourcemanage import Resource_Manager
-import fill_info
+from eln_packages_common.resourcemanage import Resource_Manager
+import eln_packages_common.fill_info as fill_info
 import printer.generate_label
 import json
 import slack.slackbot as slackbot
