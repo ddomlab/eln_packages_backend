@@ -1,5 +1,5 @@
 import image_generator as ig
-from eln_pacakges_common.resourcemanage import Resource_Manager
+from eln_packages_common.resourcemanage import Resource_Manager
 import eln_packages_common.fill_info as fill_info
 import printer.generate_label
 import json
