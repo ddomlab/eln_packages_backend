@@ -70,7 +70,7 @@ def autofill(start=300, end=None, force=False, info=True, label=True, image=True
             if type == 2 or type == 3:  # limits to only polymers and compounds
                 metadata = json.loads(item["metadata"])
                 # check if the item has been autofilled already, or if force is true
-                if item["tags"] is None or "Autofilled" not in item["tags"] or force:
+                if (item["tags"] is None or "Autofilled" not in item["tags"] or force) and not rm.is_item_busy(id):
                     if info:
                         try:
                             fill_info.fill_in(id)
