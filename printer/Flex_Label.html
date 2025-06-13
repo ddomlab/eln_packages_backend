@@ -1,0 +1,14 @@
+{% if qr_text %}
+<img src="{{ label_tools.qr_code(qr_text) }}"/>
+{% endif %}
+<span class='label'>
+    {{ caption }}<br/>
+    <!-- id: {{ id_num }} <br/> -->
+    {% if longcaption %}
+    <div class="extra_info">
+    {{ longcaption }}
+    </div>
+    {% endif %}
+</span>
+
+
