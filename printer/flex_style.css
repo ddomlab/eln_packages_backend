@@ -9,7 +9,7 @@
     text-wrap: wrap;
     max-width: 62mm;
 }
-img {
+img, svg {
     height: 18mm;
     display: inline-block;
     vertical-align: middle;
