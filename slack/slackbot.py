@@ -2,7 +2,7 @@ import requests
 from pathlib import Path
 
 # channel ID of the eln_bot channel, can be found by clicking "view channel details"
-DEFAULT_CHANNEL: str = "G093HPVQ9AP"
+DEFAULT_CHANNEL: str = "C093HPVRLKD"
 BOT_TOKEN: str = ""
 current_dir: Path = Path(__file__).parent
 BOT_TOKEN_PATH: str = str(current_dir / "slack_bot_token")
@@ -30,3 +30,8 @@ def send_message(message: str, channel: str = DEFAULT_CHANNEL):
     requests.post(
         "https://slack.com/api/chat.postMessage", headers=headers, json=json_data
     )
+
+if __name__ == "__main__":
+    # Test the bot by sending a message to the default channel
+    send_message("Hello from the ELN bot! This is a test message.")
+    print("Message sent successfully.")
