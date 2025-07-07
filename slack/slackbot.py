@@ -2,12 +2,12 @@ import requests
 from pathlib import Path
 
 # channel ID of the eln_bot channel, can be found by clicking "view channel details"
-DEFAULT_CHANNEL: str = "C0787CBAWD9"
+DEFAULT_CHANNEL: str = "G093HPVQ9AP"
 BOT_TOKEN: str = ""
 current_dir: Path = Path(__file__).parent
 BOT_TOKEN_PATH: str = str(current_dir / "slack_bot_token")
 with open(BOT_TOKEN_PATH) as file:
-    BOT_TOKEN = file.read()
+    BOT_TOKEN = file.read().rstrip()
 
 # headers and authentication token
 headers: dict = {
